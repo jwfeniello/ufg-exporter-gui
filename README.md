@@ -1,15 +1,38 @@
-# UFG
+## UFG Exporter GUI
 
-Tools for working with games made by UFG, mainly supports Modnation Racers and LittleBigPlanet Karting.
+This is an attempt to make Java GUI that wraps around `ufg-exporter-0.1.jar` to (hopefully) make exporting ModNation Racers and LBP Karting models/textures easier.
 
-*JARs are automatically built and are available in the [Actions](https://github.com/ennuo/ufg/actions) tab.*
+You give just give it one of the game folders and it will do everything else.
 
-## Tools
+### Features
 
-### [Model Exporter](https://github.com/ennuo/ufg/tree/main/exporter)
+- Recursively finds models and textures in subfolders
+- Works even if folders only have models, only textures, or both
+- Works with both ModNation and LBP Karting
+- Option to export textures as PNGs
+- Shows Progress
 
-CLI utility for exporting texture and mesh data.
+### How to Build
 
-### [Model Assembler](https://github.com/ennuo/ufg/tree/main/assembler)
+You need Java (version 11 or higher)
 
-Work in progress testbed for importing custom content.
+```bash
+javac ModnationExporterGUI.java
+jar cfm ModnationExporterGUI.jar manifest.txt ModnationExporterGUI.class "FIXED UFG.png"
+```
+
+Make sure your `manifest.txt` file contains:
+
+```
+Main-Class: ModnationExporterGUI
+```
+
+Then run it with:
+
+```bash
+java -jar ModnationExporterGUI.jar
+```
+
+Or just double-click the JAR if you're on Windows.
+
+This is very early and there will be bugs so please lmk here or on discord (username is clickbate) if you have any issues.  
