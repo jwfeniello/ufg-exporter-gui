@@ -12,6 +12,7 @@ You give just give it one of the game folders and it will do everything else.
 - Works with both ModNation and LBP Karting
 - Option to export textures as PNGs
 - Shows Progress
+- Has me trying to think of more things to sound impressive
 
 ### How to Build
 
