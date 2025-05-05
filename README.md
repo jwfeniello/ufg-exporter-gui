@@ -1,3 +1,4 @@
+![image](https://github.com/user-attachments/assets/71978f8c-9870-45f4-b5c8-47dbe1cf8d2d)
 ## UFG Exporter GUI
 
 This is an attempt to make Java GUI that wraps around `ufg-exporter-0.1.jar` to (hopefully) make exporting ModNation Racers and LBP Karting models/textures easier.
