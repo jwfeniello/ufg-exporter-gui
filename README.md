@@ -22,7 +22,7 @@ javac ModnationExporterGUI.java
 jar cfm ModnationExporterGUI.jar manifest.txt ModnationExporterGUI.class "FIXED UFG.png"
 ```
 
-Make sure your `manifest.txt` file contains:
+Make sure your `manifest.txt` file  (if you want to make your own for some reason)contains:
 
 ```
 Main-Class: ModnationExporterGUI
@@ -37,3 +37,5 @@ java -jar ModnationExporterGUI.jar
 Or just double-click the JAR if you're on Windows.
 
 This is very early and there will be bugs so please lmk here or on discord (username is clickbate) if you have any issues.  
+
+HUGE THANKS TO ENNUO FOR ALL THEIR AMAZING AND HARD WORK IN THE LBP AND MODNATION SCENES ❤️❤️❤️❤️
