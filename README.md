@@ -3,7 +3,7 @@
 
 This is an attempt to make Java GUI that wraps around `ufg-exporter-0.1.jar` to (hopefully) make exporting ModNation Racers and LBP Karting models/textures easier.
 
-You give just give it one of the game folders and it will do everything else.
+You just give it one of the game folders and it will do everything else.
 
 ### Features
 
