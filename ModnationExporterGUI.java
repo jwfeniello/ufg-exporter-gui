@@ -5,6 +5,7 @@ import java.awt.event.*;
 import java.io.*;
 import java.util.*;
 import java.util.List;
+import com.formdev.flatlaf.FlatDarkLaf;
 
 public class ModnationExporterGUI {
     private static JTextField inputField;
@@ -18,6 +19,13 @@ public class ModnationExporterGUI {
     private static final File CONFIG_FILE = new File("modnation_exporter_config.properties");
 
     public static void main(String[] args) {
+        // Set FlatLaf Dark Look and Feel
+        try {
+            FlatDarkLaf.setup();
+        } catch (Exception ex) {
+            System.err.println("Failed to initialize FlatLaf");
+        }
+
         JFrame frame = new JFrame("ModNation Exporter");
         frame.setSize(700, 540);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -25,6 +33,7 @@ public class ModnationExporterGUI {
 
         // LOGO from inside JAR
         JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         try {
             InputStream imgStream = ModnationExporterGUI.class.getResourceAsStream("/FIXED UFG.png");
             if (imgStream != null) {
@@ -44,15 +53,21 @@ public class ModnationExporterGUI {
         // CENTER
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        
         inputField = new JTextField(40);
         outputField = new JTextField(40);
         jarField = new JTextField(40);
         gameSelector = new JComboBox<>(new String[]{"ModNation Racers", "LBP Karting"});
 
         mainPanel.add(makeRow("Input Folder:", inputField, e -> chooseDirectory(inputField)));
+        mainPanel.add(Box.createVerticalStrut(5));
         mainPanel.add(makeRow("Output Folder:", outputField, e -> chooseDirectory(outputField)));
+        mainPanel.add(Box.createVerticalStrut(5));
         mainPanel.add(makeRow("ufg-exporter-0.1.jar:", jarField, e -> chooseFile(jarField)));
+        mainPanel.add(Box.createVerticalStrut(5));
         mainPanel.add(makeRow("Game:", gameSelector));
+        mainPanel.add(Box.createVerticalStrut(10));
 
         JPanel checkPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         includeTextures = new JCheckBox("Include textures");
@@ -62,12 +77,13 @@ public class ModnationExporterGUI {
         checkPanel.add(includeTextures);
         checkPanel.add(dumpPNGs);
         mainPanel.add(checkPanel);
+        mainPanel.add(Box.createVerticalStrut(10));
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         runButton = new JButton("Run Export");
-        JButton helpButton = new JButton("What’s UFG?");
-        runButton.setPreferredSize(new Dimension(120, 25));
-        helpButton.setPreferredSize(new Dimension(120, 25));
+        JButton helpButton = new JButton("What's UFG?");
+        runButton.setPreferredSize(new Dimension(120, 30));
+        helpButton.setPreferredSize(new Dimension(120, 30));
         buttonPanel.add(runButton);
         buttonPanel.add(helpButton);
         mainPanel.add(buttonPanel);
@@ -79,36 +95,49 @@ public class ModnationExporterGUI {
 
         // BOTTOM: log + credit
         JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
+        
         log = new JTextArea(8, 60);
         log.setFont(new Font("Monospaced", Font.PLAIN, 11));
         log.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(log);
+        scrollPane.setBorder(BorderFactory.createTitledBorder("Export Log"));
         bottomPanel.add(scrollPane, BorderLayout.CENTER);
 
         JLabel credit = new JLabel("Made by Clickbate");
         credit.setFont(new Font("Arial", Font.PLAIN, 9));
         credit.setHorizontalAlignment(JLabel.LEFT);
+        credit.setBorder(BorderFactory.createEmptyBorder(5, 0, 0, 0));
         bottomPanel.add(credit, BorderLayout.SOUTH);
 
         frame.add(bottomPanel, BorderLayout.SOUTH);
 
         loadSavedPaths();
+        
+        // Force proper layout calculation
+        frame.pack();
+        frame.setSize(700, 540);  // Reset to desired size after pack
+        frame.setLocationRelativeTo(null);  // Center on screen
         frame.setVisible(true);
     }
 
     private static JPanel makeRow(String label, JComponent field) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 2));
-        panel.add(new JLabel(label));
+        JLabel jLabel = new JLabel(label);
+        jLabel.setPreferredSize(new Dimension(150, 25));
+        panel.add(jLabel);
         panel.add(field);
         return panel;
     }
 
     private static JPanel makeRow(String label, JTextField field, ActionListener browseAction) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 2));
-        panel.add(new JLabel(label));
+        JLabel jLabel = new JLabel(label);
+        jLabel.setPreferredSize(new Dimension(150, 25));
+        panel.add(jLabel);
         panel.add(field);
         JButton browse = new JButton("Browse");
-        browse.setPreferredSize(new Dimension(80, 22));
+        browse.setPreferredSize(new Dimension(80, 25));
         browse.addActionListener(browseAction);
         panel.add(browse);
         return panel;
@@ -153,38 +182,39 @@ public class ModnationExporterGUI {
 
             for (File dir : allDirs) {
                 boolean didSomething = false;
-                File model = new File(dir, "CHARMODELPACKSTREAMING.BIN");
-
-                if (model.exists()) {
-                    log.append("✓ Found model in: " + dir.getAbsolutePath() + "\n");
+                
+                // Find all potential model files - look for any BIN file that might be a model
+                List<File> potentialModels = findPotentialModels(dir);
+                
+                for (File model : potentialModels) {
+                    log.append("✓ Found potential model: " + model.getName() + " in: " + dir.getAbsolutePath() + "\n");
                     log.append("→ Exporting model...\n");
-                    runCommand(jar, model, null, null, outputDir, dir.getName() + "_MODEL_ONLY", false, game);
+                    runCommand(jar, model, null, null, outputDir, dir.getName() + "_" + model.getName(), false, game);
                     log.append("✔ Done exporting model.\n");
                     didSomething = true;
                     ranAny = true;
                 }
 
                 if (includeTextures.isSelected()) {
-                    File[] files = dir.listFiles();
-                    if (files != null) {
-                        for (File file : files) {
-                            String name = file.getName().toUpperCase();
-                            if (name.endsWith(".PERM.BIN")) {
-                                String base = name.replace(".PERM.BIN", "");
-                                File idx = new File(dir, base + ".PERM.IDX");
-
-                                if (idx.exists()) {
-                                    log.append("✓ Found texture pair:\n");
-                                    log.append("     PERM: " + file.getName() + "\n");
-                                    log.append("     IDX : " + idx.getName() + "\n");
-                                    log.append("→ Exporting textures...\n");
-                                    runCommand(jar, model.exists() ? model : null, file, idx, outputDir, dir.getName() + "_" + base, dumpPNGs.isSelected(), game);
-                                    log.append("✔ Done exporting textures.\n");
-                                    didSomething = true;
-                                    ranAny = true;
-                                }
-                            }
-                        }
+                    // Find all texture pairs (.PERM.BIN and .PERM.IDX)
+                    Map<File, File> texturePairs = findTexturePairs(dir);
+                    
+                    for (Map.Entry<File, File> pair : texturePairs.entrySet()) {
+                        File permFile = pair.getKey();
+                        File idxFile = pair.getValue();
+                        String baseName = permFile.getName().replace(".PERM.BIN", "");
+                        
+                        log.append("✓ Found texture pair:\n");
+                        log.append("     PERM: " + permFile.getName() + "\n");
+                        log.append("     IDX : " + idxFile.getName() + "\n");
+                        log.append("→ Exporting textures...\n");
+                        
+                        // Use the first model if available, otherwise just export textures
+                        File modelToUse = potentialModels.isEmpty() ? null : potentialModels.get(0);
+                        runCommand(jar, modelToUse, permFile, idxFile, outputDir, dir.getName() + "_" + baseName, dumpPNGs.isSelected(), game);
+                        log.append("✔ Done exporting textures.\n");
+                        didSomething = true;
+                        ranAny = true;
                     }
                 }
 
@@ -203,6 +233,73 @@ public class ModnationExporterGUI {
                 runButton.setText("Run Export");
             });
         }).start();
+    }
+
+    // Find all potential model files (any .BIN file that could be a model)
+    private static List<File> findPotentialModels(File dir) {
+        List<File> models = new ArrayList<>();
+        File[] files = dir.listFiles();
+        
+        if (files != null) {
+            for (File file : files) {
+                // Look for standard model file
+                if (file.getName().equals("CHARMODELPACKSTREAMING.BIN")) {
+                    models.add(file);
+                    continue;  // No need to check other patterns for this file
+                }
+                
+                // Look for any .BIN file that might be a model (not textures)
+                String name = file.getName().toUpperCase();
+                if (name.endsWith(".BIN") && 
+                    !name.endsWith(".PERM.BIN") && 
+                    !name.endsWith(".IDX") && 
+                    !name.contains("TEXTURES")) {
+                    // Potential model file
+                    models.add(file);
+                }
+            }
+        }
+        
+        return models;
+    }
+
+    // Find all texture pairs (.PERM.BIN and .PERM.IDX)
+    private static Map<File, File> findTexturePairs(File dir) {
+        Map<File, File> pairs = new HashMap<>();
+        Map<String, File> permFiles = new HashMap<>();
+        Map<String, File> idxFiles = new HashMap<>();
+        
+        File[] files = dir.listFiles();
+        if (files != null) {
+            // First collect all potential texture files
+            for (File file : files) {
+                String name = file.getName().toUpperCase();
+                if (name.endsWith(".PERM.BIN")) {
+                    String baseName = name.substring(0, name.lastIndexOf(".PERM.BIN"));
+                    permFiles.put(baseName, file);
+                } else if (name.endsWith(".PERM.IDX")) {
+                    String baseName = name.substring(0, name.lastIndexOf(".PERM.IDX"));
+                    idxFiles.put(baseName, file);
+                } else if (name.endsWith(".BIN") && name.contains("TEXTURE")) {
+                    // Special case for files with TEXTURE in the name
+                    String baseName = name.substring(0, name.lastIndexOf(".BIN"));
+                    permFiles.put(baseName, file);
+                } else if (name.endsWith(".IDX") && name.contains("TEXTURE")) {
+                    // Special case for files with TEXTURE in the name
+                    String baseName = name.substring(0, name.lastIndexOf(".IDX"));
+                    idxFiles.put(baseName, file);
+                }
+            }
+            
+            // Match pairs
+            for (String baseName : permFiles.keySet()) {
+                if (idxFiles.containsKey(baseName)) {
+                    pairs.put(permFiles.get(baseName), idxFiles.get(baseName));
+                }
+            }
+        }
+        
+        return pairs;
     }
 
     private static void runCommand(File jar, File model, File perm, File idx, File outputRoot, String subfolderName, boolean dump, String game) {
