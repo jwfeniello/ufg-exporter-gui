@@ -12,21 +12,26 @@ You just give it one of the game folders and it will do everything else.
 - Works with both ModNation and LBP Karting
 - Option to export textures as PNGs
 - Shows Progress
+- Modern dark theme UI
 - Has me trying to think of more things to sound impressive
+
+### Dependencies
+
+You need to download FlatLaf:
+
+https://repo1.maven.org/maven2/com/formdev/flatlaf/3.6/flatlaf-3.6.jar
+
+Place it in the project root directory (same folder as `ModnationExporterGUI.java`)
 
 ### How to Build
 
 You need Java (version 11 or higher)
 
 ```bash
-javac ModnationExporterGUI.java
-jar cfm ModnationExporterGUI.jar manifest.txt ModnationExporterGUI.class "FIXED UFG.png"
-```
-
-Make sure your `manifest.txt` file  (if you want to make your own for some reason)contains:
-
-```
-Main-Class: ModnationExporterGUI
+javac -cp "flatlaf-3.6.jar" ModnationExporterGUI.java
+mkdir temp && cd temp && jar xf ../flatlaf-3.6.jar && cd ..
+jar cfm ModnationExporterGUI.jar manifest.txt ModnationExporterGUI.class "FIXED UFG.png" -C temp .
+rmdir /s temp
 ```
 
 Then run it with:
@@ -34,8 +39,6 @@ Then run it with:
 ```bash
 java -jar ModnationExporterGUI.jar
 ```
-
-Or just double-click the JAR if you're on Windows.
 
 This is very early and there will be bugs so please lmk here or on discord (username is clickbate) if you have any issues.  
 
