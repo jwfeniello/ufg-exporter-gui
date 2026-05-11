@@ -67,8 +67,7 @@ This is very early and there will be bugs so please lmk here or on discord (user
 
 ---
 
-###  Special Thanks
+### 🏆 Special Thanks
 
 HUGE THANKS TO ENNUO FOR ALL THEIR AMAZING AND HARD WORK IN THE LBP AND MODNATION SCENES
 
----
