@@ -21,12 +21,9 @@ public class ModnationExporterGUI {
     private static final AtomicBoolean isExporting = new AtomicBoolean(false);
 
     public static void main(String[] args) {
-        // Set Look and Feel
         try {
-            // Try to use FlatLaf if available
             try {
                 Class.forName("com.formdev.flatlaf.FlatDarkLaf");
-                // Use reflection to avoid compilation issues
                 Class<?> flatLafClass = Class.forName("com.formdev.flatlaf.FlatDarkLaf");
                 java.lang.reflect.Method setupMethod = flatLafClass.getMethod("setup");
                 setupMethod.invoke(null);
@@ -36,7 +33,6 @@ public class ModnationExporterGUI {
             }
         } catch (Exception ex) {
             System.err.println("Failed to set look and feel: " + ex.getMessage());
-            // Continue with default look and feel
         }
 
         SwingUtilities.invokeLater(() -> createAndShowGUI());
@@ -49,26 +45,22 @@ public class ModnationExporterGUI {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
 
-        // LOGO from inside JAR
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         loadLogo(topPanel);
         frame.add(topPanel, BorderLayout.NORTH);
 
-        // CENTER
         JPanel mainPanel = createMainPanel();
         frame.add(mainPanel, BorderLayout.CENTER);
 
-        // BOTTOM: log + credit
         JPanel bottomPanel = createBottomPanel();
         frame.add(bottomPanel, BorderLayout.SOUTH);
 
         loadSavedPaths();
-        
-        // Force proper layout calculation
+
         frame.pack();
-        frame.setSize(750, 600);  // Reset to desired size after pack
-        frame.setLocationRelativeTo(null);  // Center on screen
+        frame.setSize(750, 600);
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 
@@ -100,13 +92,12 @@ public class ModnationExporterGUI {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        
+
         inputField = new JTextField(40);
         outputField = new JTextField(40);
         jarField = new JTextField(40);
         gameSelector = new JComboBox<>(new String[]{"ModNation Racers", "LBP Karting"});
 
-        // Set minimum sizes for text fields
         inputField.setMinimumSize(new Dimension(300, 25));
         outputField.setMinimumSize(new Dimension(300, 25));
         jarField.setMinimumSize(new Dimension(300, 25));
@@ -147,7 +138,6 @@ public class ModnationExporterGUI {
         helpButton.addActionListener(e -> showHelp());
         clearLogButton.addActionListener(e -> clearLog());
 
-        // Progress bar
         progressBar = new JProgressBar(0, 100);
         progressBar.setStringPainted(true);
         progressBar.setString("Ready");
@@ -162,7 +152,7 @@ public class ModnationExporterGUI {
     private static JPanel createBottomPanel() {
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
-        
+
         log = new JTextArea(8, 60);
         log.setFont(new Font("Monospaced", Font.PLAIN, 11));
         log.setEditable(false);
@@ -181,6 +171,10 @@ public class ModnationExporterGUI {
         return bottomPanel;
     }
 
+    private static void appendLog(String text) {
+        SwingUtilities.invokeLater(() -> log.append(text));
+    }
+
     private static JPanel makeRow(String label, JComponent field) {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 2));
         JLabel jLabel = new JLabel(label);
@@ -193,23 +187,20 @@ public class ModnationExporterGUI {
     private static JPanel makeRow(String label, JTextField field, ActionListener browseAction) {
         JPanel panel = new JPanel(new BorderLayout(5, 0));
         panel.setBorder(BorderFactory.createEmptyBorder(2, 0, 2, 0));
-        
-        // Label on the left
+
         JLabel jLabel = new JLabel(label);
         jLabel.setPreferredSize(new Dimension(150, 25));
         panel.add(jLabel, BorderLayout.WEST);
-        
-        // Text field in center
+
         field.setPreferredSize(new Dimension(300, 25));
         panel.add(field, BorderLayout.CENTER);
-        
-        // Browse button on the right
+
         JButton browse = new JButton("Browse");
         browse.setPreferredSize(new Dimension(80, 25));
         browse.setMinimumSize(new Dimension(80, 25));
         browse.addActionListener(browseAction);
         panel.add(browse, BorderLayout.EAST);
-        
+
         return panel;
     }
 
@@ -217,8 +208,7 @@ public class ModnationExporterGUI {
         JFileChooser chooser = new JFileChooser();
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         chooser.setDialogTitle("Select Directory");
-        
-        // Set current directory if field has a value
+
         String currentPath = target.getText().trim();
         if (!currentPath.isEmpty()) {
             File currentDir = new File(currentPath);
@@ -226,7 +216,7 @@ public class ModnationExporterGUI {
                 chooser.setCurrentDirectory(currentDir);
             }
         }
-        
+
         if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
             target.setText(chooser.getSelectedFile().getAbsolutePath());
         }
@@ -236,8 +226,7 @@ public class ModnationExporterGUI {
         JFileChooser chooser = new JFileChooser();
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         chooser.setDialogTitle("Select JAR File");
-        
-        // Set current directory if field has a value
+
         String currentPath = target.getText().trim();
         if (!currentPath.isEmpty()) {
             File currentFile = new File(currentPath);
@@ -245,7 +234,7 @@ public class ModnationExporterGUI {
                 chooser.setCurrentDirectory(currentFile.getParentFile());
             }
         }
-        
+
         if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
             target.setText(chooser.getSelectedFile().getAbsolutePath());
         }
@@ -262,7 +251,6 @@ public class ModnationExporterGUI {
             return;
         }
 
-        // Validate inputs
         String inputPath = inputField.getText().trim();
         String outputPath = outputField.getText().trim();
         String jarPath = jarField.getText().trim();
@@ -302,6 +290,11 @@ public class ModnationExporterGUI {
             log.append("WARNING: Selected file may not be a JAR file.\n");
         }
 
+        // Capture Swing state before leaving the EDT
+        String selectedGame = (String) gameSelector.getSelectedItem();
+        boolean textures = includeTextures.isSelected();
+        boolean pngs = dumpPNGs.isSelected();
+
         isExporting.set(true);
         runButton.setEnabled(false);
         runButton.setText("Exporting...");
@@ -311,7 +304,7 @@ public class ModnationExporterGUI {
 
         new Thread(() -> {
             try {
-                performExport(inputDir, outputDir, jar);
+                performExport(inputDir, outputDir, jar, selectedGame, textures, pngs);
             } finally {
                 SwingUtilities.invokeLater(() -> {
                     isExporting.set(false);
@@ -324,156 +317,126 @@ public class ModnationExporterGUI {
         }).start();
     }
 
-    private static void performExport(File inputDir, File outputDir, File jar) {
-        log.append("Starting export process...\n");
-        String game = gameSelector.getSelectedItem().toString().toLowerCase().contains("karting") ? "lbpk" : "mnr";
+    private static void performExport(File inputDir, File outputDir, File jar, String selectedGame, boolean textures, boolean pngs) {
+        appendLog("Starting export process...\n");
+        String game = selectedGame.toLowerCase().contains("karting") ? "lbpk" : "mnr";
         List<File> allDirs = new ArrayList<>();
         collectDirs(inputDir, allDirs);
 
         if (allDirs.isEmpty()) {
-            log.append("No directories found to process.\n");
+            appendLog("No directories found to process.\n");
             return;
         }
 
-        log.append("Found " + allDirs.size() + " directories to process.\n\n");
+        appendLog("Found " + allDirs.size() + " directories to process.\n\n");
 
         boolean ranAny = false;
         int processedCount = 0;
 
         for (File dir : allDirs) {
             final int currentCount = processedCount;
-            SwingUtilities.invokeLater(() -> {
-                progressBar.setString("Processing directory " + (currentCount + 1) + " of " + allDirs.size());
-            });
+            SwingUtilities.invokeLater(() ->
+                progressBar.setString("Processing directory " + (currentCount + 1) + " of " + allDirs.size())
+            );
 
             boolean didSomething = false;
-            
-            // Find all potential model files
+
             List<File> potentialModels = findPotentialModels(dir);
-            
+
             for (File model : potentialModels) {
-                log.append("✓ Found potential model: " + model.getName() + " in: " + dir.getAbsolutePath() + "\n");
-                log.append("→ Exporting model...\n");
+                appendLog("✓ Found potential model: " + model.getName() + " in: " + dir.getAbsolutePath() + "\n");
+                appendLog("→ Exporting model...\n");
                 boolean success = runCommand(jar, model, null, null, outputDir, dir.getName() + "_" + model.getName(), false, game);
-                if (success) {
-                    log.append("✔ Done exporting model.\n");
-                } else {
-                    log.append("✗ Failed to export model.\n");
-                }
+                appendLog(success ? "✔ Done exporting model.\n" : "✗ Failed to export model.\n");
                 didSomething = true;
                 ranAny = true;
             }
 
-            if (includeTextures.isSelected()) {
+            if (textures) {
                 Map<File, File> texturePairs = findTexturePairs(dir);
-                
+
                 for (Map.Entry<File, File> pair : texturePairs.entrySet()) {
                     File permFile = pair.getKey();
                     File idxFile = pair.getValue();
                     String baseName = permFile.getName().replace(".PERM.BIN", "");
-                    
-                    log.append("✓ Found texture pair:\n");
-                    log.append("     PERM: " + permFile.getName() + "\n");
-                    log.append("     IDX : " + idxFile.getName() + "\n");
-                    log.append("→ Exporting textures...\n");
-                    
+
+                    appendLog("✓ Found texture pair:\n");
+                    appendLog("     PERM: " + permFile.getName() + "\n");
+                    appendLog("     IDX : " + idxFile.getName() + "\n");
+                    appendLog("→ Exporting textures...\n");
+
                     File modelToUse = potentialModels.isEmpty() ? null : potentialModels.get(0);
-                    boolean success = runCommand(jar, modelToUse, permFile, idxFile, outputDir, dir.getName() + "_" + baseName, dumpPNGs.isSelected(), game);
-                    if (success) {
-                        log.append("✔ Done exporting textures.\n");
-                    } else {
-                        log.append("✗ Failed to export textures.\n");
-                    }
+                    boolean success = runCommand(jar, modelToUse, permFile, idxFile, outputDir, dir.getName() + "_" + baseName, pngs, game);
+                    appendLog(success ? "✔ Done exporting textures.\n" : "✗ Failed to export textures.\n");
                     didSomething = true;
                     ranAny = true;
                 }
             }
 
-            if (!didSomething) {
-                log.append("⨯ Skipped " + dir.getName() + " (no valid model or texture pair)\n");
-            }
-
-            log.append("\n");
+            appendLog(didSomething ? "\n" : "⨯ Skipped " + dir.getName() + " (no valid model or texture pair)\n\n");
             processedCount++;
         }
 
-        if (!ranAny) {
-            log.append("No valid exports found.\n");
-        } else {
-            log.append("Export process completed.\n");
-        }
+        appendLog(ranAny ? "Export process completed.\n" : "No valid exports found.\n");
 
-        savePaths();
+        SwingUtilities.invokeLater(() -> savePaths());
     }
 
-    // Find all potential model files (any .BIN file that could be a model)
     private static List<File> findPotentialModels(File dir) {
         List<File> models = new ArrayList<>();
         File[] files = dir.listFiles();
-        
+
         if (files != null) {
             for (File file : files) {
                 if (!file.isFile()) continue;
-                
-                // Look for standard model file
+
                 if (file.getName().equals("CHARMODELPACKSTREAMING.BIN")) {
                     models.add(file);
-                    continue;  // No need to check other patterns for this file
+                    continue;
                 }
-                
-                // Look for any .BIN file that might be a model (not textures)
+
                 String name = file.getName().toUpperCase();
-                if (name.endsWith(".BIN") && 
-                    !name.endsWith(".PERM.BIN") && 
-                    !name.endsWith(".IDX") && 
+                if (name.endsWith(".BIN") &&
+                    !name.endsWith(".PERM.BIN") &&
+                    !name.endsWith(".IDX") &&
                     !name.contains("TEXTURES")) {
-                    // Potential model file
                     models.add(file);
                 }
             }
         }
-        
+
         return models;
     }
 
-    // Find all texture pairs (.PERM.BIN and .PERM.IDX)
     private static Map<File, File> findTexturePairs(File dir) {
         Map<File, File> pairs = new HashMap<>();
         Map<String, File> permFiles = new HashMap<>();
         Map<String, File> idxFiles = new HashMap<>();
-        
+
         File[] files = dir.listFiles();
         if (files != null) {
-            // First collect all potential texture files
             for (File file : files) {
                 if (!file.isFile()) continue;
-                
+
                 String name = file.getName().toUpperCase();
                 if (name.endsWith(".PERM.BIN")) {
-                    String baseName = name.substring(0, name.lastIndexOf(".PERM.BIN"));
-                    permFiles.put(baseName, file);
+                    permFiles.put(name.substring(0, name.lastIndexOf(".PERM.BIN")), file);
                 } else if (name.endsWith(".PERM.IDX")) {
-                    String baseName = name.substring(0, name.lastIndexOf(".PERM.IDX"));
-                    idxFiles.put(baseName, file);
+                    idxFiles.put(name.substring(0, name.lastIndexOf(".PERM.IDX")), file);
                 } else if (name.endsWith(".BIN") && name.contains("TEXTURE")) {
-                    // Special case for files with TEXTURE in the name
-                    String baseName = name.substring(0, name.lastIndexOf(".BIN"));
-                    permFiles.put(baseName, file);
+                    permFiles.put(name.substring(0, name.lastIndexOf(".BIN")), file);
                 } else if (name.endsWith(".IDX") && name.contains("TEXTURE")) {
-                    // Special case for files with TEXTURE in the name
-                    String baseName = name.substring(0, name.lastIndexOf(".IDX"));
-                    idxFiles.put(baseName, file);
+                    idxFiles.put(name.substring(0, name.lastIndexOf(".IDX")), file);
                 }
             }
-            
-            // Match pairs
+
             for (String baseName : permFiles.keySet()) {
                 if (idxFiles.containsKey(baseName)) {
                     pairs.put(permFiles.get(baseName), idxFiles.get(baseName));
                 }
             }
         }
-        
+
         return pairs;
     }
 
@@ -495,7 +458,7 @@ public class ModnationExporterGUI {
                 if (dump) cmd.add("--dump-textures");
             }
 
-            log.append("Running: " + String.join(" ", cmd) + "\n");
+            appendLog("Running: " + String.join(" ", cmd) + "\n");
 
             ProcessBuilder pb = new ProcessBuilder(cmd);
             pb.redirectErrorStream(true);
@@ -504,15 +467,15 @@ public class ModnationExporterGUI {
             BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
             String line;
             while ((line = reader.readLine()) != null) {
-                log.append(line + "\n");
+                appendLog(line + "\n");
             }
 
             int exit = p.waitFor();
-            log.append("Exit Code: " + exit + "\n\n");
-            
+            appendLog("Exit Code: " + exit + "\n\n");
+
             return exit == 0;
         } catch (Exception ex) {
-            log.append("FAILED: " + ex.getMessage() + "\n\n");
+            appendLog("FAILED: " + ex.getMessage() + "\n\n");
             return false;
         }
     }
@@ -530,7 +493,7 @@ public class ModnationExporterGUI {
     }
 
     private static void showHelp() {
-        String htmlContent = 
+        String htmlContent =
             "<html><body style='font-family: Arial; font-size: 12px;'>" +
             "<p><b>UFG Exporter</b> is the tool this GUI wraps around.<br>" +
             "It was originally on GitHub, but now the only known download link is:</p>" +
@@ -552,8 +515,7 @@ public class ModnationExporterGUI {
         help.setBackground(null);
         help.setBorder(null);
         help.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
-        
-        // Make links clickable
+
         help.addHyperlinkListener(e -> {
             if (e.getEventType() == javax.swing.event.HyperlinkEvent.EventType.ACTIVATED) {
                 try {
